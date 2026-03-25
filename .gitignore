@@ -2,3 +2,4 @@ node_modules/
 .env
 *.db
 foodshare-deploy.zip
+package-lock.json
