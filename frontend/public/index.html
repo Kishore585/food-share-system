@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
+<title>FoodShare — Community Food Distribution</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --g1:#1B4332;--g2:#2D6A4F;--g3:#40916C;--g4:#52B788;--g5:#95D5B2;--g6:#D8F3DC;
+  --cream:#FEFAE0;--off:#F0FFF4;
+  --amb:#F4A261;--amb2:#E76F51;--amb3:#FFF3E8;
+  --rec:#7C3AED;--rec2:#6D28D9;--rec3:#EDE9FE;--rec4:#C4B5FD;
+  --text:#1A1A2E;--muted:#6B7280;--border:#E2E8F0;
+  --white:#FFF;--surface:#F8FAFC;
+  --r:14px;--r2:22px;
+  --sh:0 4px 20px rgba(27,67,50,.10);--sh2:0 16px 56px rgba(27,67,50,.18);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);min-height:100vh;line-height:1.65}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--surface)}::-webkit-scrollbar-thumb{background:var(--g4);border-radius:3px}
+
+/* ══ NAV ══ */
+.nav{position:sticky;top:0;z-index:500;background:var(--g1);height:62px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;box-shadow:0 2px 20px rgba(0,0,0,.22)}
+.nav-brand{display:flex;align-items:center;gap:10px;cursor:pointer}
+.nav-logo{width:36px;height:36px;background:linear-gradient(135deg,var(--g4),var(--amb));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.15rem}
+.nav-name{font-family:'Playfair Display',serif;font-size:1.25rem;font-weight:700;color:#fff;letter-spacing:-.02em}
+.nav-right{display:flex;align-items:center;gap:7px;flex-wrap:nowrap}
+.nb{background:transparent;border:1.5px solid rgba(255,255,255,.3);color:rgba(255,255,255,.85);padding:7px 15px;border-radius:30px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:500;transition:all .2s;white-space:nowrap}
+.nb:hover,.nb.act{background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.55)}
+.nb.cta{background:var(--amb);border-color:var(--amb);color:#fff;font-weight:600}
+.nb.cta:hover{background:var(--amb2)}
+.nb.rec-btn{background:var(--rec);border-color:var(--rec);color:#fff;font-weight:600}
+.nb.rec-btn:hover{background:var(--rec2)}
+.nb.danger{background:rgba(239,68,68,.18);border-color:rgba(239,68,68,.35);color:#FCA5A5}
+.nb.danger:hover{background:rgba(239,68,68,.32)}
+.uavatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.88rem;color:#fff;flex-shrink:0}
+.uavatar.av-g{background:linear-gradient(135deg,var(--g4),var(--g3))}
+.uavatar.av-r{background:linear-gradient(135deg,var(--rec),var(--rec2))}
+.uavatar.av-a{background:linear-gradient(135deg,var(--amb),var(--amb2))}
+.uname-nav{font-size:.8rem;color:rgba(255,255,255,.8);max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ══ PAGES ══ */
+.page{display:none;animation:fadeIn .3s ease}
+.page.on{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* ══ LANDING ══ */
+.hero{min-height:calc(100vh - 62px);background:linear-gradient(150deg,var(--g1) 0%,var(--g2) 48%,var(--g3) 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;text-align:center;position:relative;overflow:hidden}
+.blob1{position:absolute;width:520px;height:520px;background:radial-gradient(circle,rgba(82,183,136,.22),transparent 70%);top:-120px;right:-120px;pointer-events:none}
+.blob2{position:absolute;width:380px;height:380px;background:radial-gradient(circle,rgba(244,162,97,.18),transparent 70%);bottom:-70px;left:-70px;pointer-events:none}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);color:rgba(255,255,255,.9);padding:7px 18px;border-radius:30px;font-size:.82rem;margin-bottom:28px;backdrop-filter:blur(4px);letter-spacing:.04em}
+.hero h1{font-family:'Playfair Display',serif;font-size:clamp(2.3rem,6.5vw,4.6rem);font-weight:900;color:#fff;line-height:1.12;margin-bottom:22px;max-width:780px}
+.hero h1 em{color:var(--amb);font-style:normal}
+.hero p{font-size:clamp(.95rem,2.5vw,1.18rem);color:rgba(255,255,255,.78);max-width:560px;margin:0 auto 44px}
+.hero-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:50px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 26px;border-radius:50px;font-family:'DM Sans',sans-serif;font-size:.94rem;font-weight:600;cursor:pointer;border:none;transition:all .25s;text-decoration:none}
+.btn-white{background:#fff;color:var(--g2);box-shadow:0 4px 20px rgba(0,0,0,.15)}
+.btn-white:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.2)}
+.btn-amb{background:var(--amb);color:#fff;box-shadow:0 4px 20px rgba(244,162,97,.4)}
+.btn-amb:hover{background:var(--amb2);transform:translateY(-2px)}
+.btn-rec{background:var(--rec);color:#fff;box-shadow:0 4px 20px rgba(124,58,237,.4)}
+.btn-rec:hover{background:var(--rec2);transform:translateY(-2px)}
+.btn-green{background:var(--g2);color:#fff}.btn-green:hover{background:var(--g3)}
+.btn-outline{background:transparent;border:2px solid var(--g3);color:var(--g2)}.btn-outline:hover{background:var(--g3);color:#fff}
+.btn-red{background:#EF4444;color:#fff}.btn-red:hover{background:#DC2626}
+.btn-purple{background:var(--rec);color:#fff}.btn-purple:hover{background:var(--rec2)}
+.btn-sm{padding:7px 16px;font-size:.82rem}.btn-xs{padding:5px 12px;font-size:.77rem}
+.btn:disabled{opacity:.6;cursor:not-allowed;transform:none!important}
+
+/* Recipient hero card */
+.rec-hero-card{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);backdrop-filter:blur(8px);border-radius:20px;padding:24px 32px;display:flex;align-items:center;gap:18px;max-width:520px;margin:0 auto;text-align:left}
+.rec-hero-icon{font-size:2.4rem;flex-shrink:0}
+.rec-hero-card h4{color:#fff;font-size:1rem;font-weight:600;margin-bottom:4px}
+.rec-hero-card p{color:rgba(255,255,255,.72);font-size:.85rem;line-height:1.45}
+
+.live-stats{display:grid;grid-template-columns:repeat(4,1fr);background:#fff;box-shadow:var(--sh2)}
+.ls-item{padding:26px 18px;text-align:center;border-right:1px solid var(--border)}
+.ls-item:last-child{border-right:none}
+.ls-val{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;color:var(--g2);line-height:1}
+.ls-lbl{font-size:.77rem;color:var(--muted);margin-top:5px;font-weight:500}
+
+.section{padding:80px 20px;max-width:1120px;margin:0 auto}
+.sec-title{font-family:'Playfair Display',serif;font-size:clamp(1.7rem,4vw,2.4rem);font-weight:700;color:var(--g1);text-align:center;margin-bottom:12px}
+.sec-sub{color:var(--muted);text-align:center;max-width:480px;margin:0 auto 48px;font-size:.94rem}
+
+.how-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px}
+.how-card{background:#fff;border-radius:var(--r2);padding:26px;border:1px solid var(--border);transition:all .25s;position:relative;overflow:hidden}
+.how-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--g4),var(--amb));opacity:0;transition:opacity .2s}
+.how-card:hover{transform:translateY(-5px);box-shadow:var(--sh2)}.how-card:hover::before{opacity:1}
+.how-icon{width:50px;height:50px;background:var(--g6);border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin-bottom:14px}
+.how-card h4{font-weight:600;margin-bottom:7px;font-size:.95rem}
+.how-card p{font-size:.85rem;color:var(--muted);line-height:1.55}
+
+.roles-bg{background:linear-gradient(135deg,var(--g1),var(--g2));padding:80px 20px}
+.roles-bg .sec-title{color:#fff}.roles-bg .sec-sub{color:rgba(255,255,255,.7)}
+.roles-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;max-width:1000px;margin:0 auto}
+.role-card{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);border-radius:var(--r2);padding:22px 16px;text-align:center;cursor:pointer;transition:all .25s;backdrop-filter:blur(4px)}
+.role-card:hover{background:rgba(255,255,255,.2);transform:translateY(-4px);border-color:rgba(255,255,255,.35)}
+.role-card.rec-card{border-color:var(--rec4);background:rgba(124,58,237,.15)}
+.role-card.rec-card:hover{background:rgba(124,58,237,.28)}
+.role-emoji{font-size:2.2rem;margin-bottom:10px;display:block}
+.role-card h4{color:#fff;font-weight:600;margin-bottom:5px;font-size:.93rem}
+.role-card p{color:rgba(255,255,255,.65);font-size:.78rem}
+
+footer{background:var(--g1);color:rgba(255,255,255,.6);text-align:center;padding:30px 20px;font-size:.83rem}
+footer strong{color:#fff}
+
+/* ══ MODALS ══ */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.52);backdrop-filter:blur(5px);z-index:1000;display:none;align-items:center;justify-content:center;padding:16px}
+.overlay.on{display:flex}
+.modal{background:#fff;border-radius:24px;padding:36px;width:100%;max-width:480px;max-height:92vh;overflow-y:auto;position:relative;animation:slideUp .3s ease;box-shadow:0 28px 80px rgba(0,0,0,.28)}
+.modal-wide{max-width:600px}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.modal-x{position:absolute;top:14px;right:16px;background:var(--surface);border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:.95rem;color:var(--muted);display:flex;align-items:center;justify-content:center;transition:all .2s}
+.modal-x:hover{background:var(--border)}
+.modal-h{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;color:var(--g1);margin-bottom:4px}
+.modal-h.purple{color:var(--rec)}
+.modal-s{color:var(--muted);font-size:.87rem;margin-bottom:24px}
+
+.fg{margin-bottom:13px}
+.fg label{display:block;font-size:.78rem;font-weight:600;color:var(--text);margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em}
+.fg input,.fg select,.fg textarea{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.9rem;color:var(--text);background:var(--surface);outline:none;transition:all .2s;-webkit-appearance:none}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--g4);background:#fff;box-shadow:0 0 0 3px rgba(82,183,136,.14)}
+.fg input.purple-focus:focus{border-color:var(--rec);box-shadow:0 0 0 3px rgba(124,58,237,.13)}
+.fg textarea{resize:vertical;min-height:76px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+
+.alert{padding:11px 14px;border-radius:9px;font-size:.85rem;margin-bottom:14px;font-weight:500}
+.alert-err{background:#FEE2E2;color:#991B1B;border:1px solid #FECACA}
+.alert-ok{background:var(--g6);color:var(--g1);border:1px solid var(--g5)}
+.alert-info{background:#EFF6FF;color:#1E40AF;border:1px solid #BFDBFE}
+.alert-rec{background:var(--rec3);color:var(--rec2);border:1px solid var(--rec4)}
+
+.tab-bar{display:flex;border-bottom:2px solid var(--border);margin-bottom:20px;gap:2px;overflow-x:auto;scrollbar-width:none}
+.tab-bar::-webkit-scrollbar{display:none}
+.tab{padding:9px 17px;border:none;background:none;font-family:'DM Sans',sans-serif;font-size:.87rem;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2.5px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:all .2s}
+.tab.on{color:var(--g2);border-bottom-color:var(--g2);font-weight:600}
+.tab.on.rec-tab{color:var(--rec);border-bottom-color:var(--rec)}
+
+/* ══ DASHBOARD ══ */
+.dash{max-width:1200px;margin:0 auto;padding:28px 20px}
+.dash-hdr{margin-bottom:26px}
+.dash-hdr h2{font-family:'Playfair Display',serif;font-size:1.7rem;font-weight:700;color:var(--g1);line-height:1.2}
+.dash-hdr h2.purple{color:var(--rec)}
+.dash-hdr p{color:var(--muted);font-size:.9rem;margin-top:4px}
+/* Recipient welcome banner */
+.rec-welcome{background:linear-gradient(135deg,var(--rec),var(--rec2));border-radius:18px;padding:22px 26px;margin-bottom:24px;display:flex;align-items:center;gap:16px;color:#fff}
+.rec-welcome-icon{font-size:2.2rem;flex-shrink:0}
+.rec-welcome h3{font-size:1.05rem;font-weight:600;margin-bottom:3px}
+.rec-welcome p{font-size:.85rem;opacity:.82;line-height:1.45}
+
+.sg{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:13px;margin-bottom:26px}
+.sc{background:#fff;border-radius:var(--r);padding:17px;border:1px solid var(--border);display:flex;align-items:center;gap:13px;transition:box-shadow .2s}
+.sc:hover{box-shadow:var(--sh)}
+.si{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.25rem;flex-shrink:0}
+.si-g{background:var(--g6)}.si-a{background:#FEF3C7}.si-b{background:#DBEAFE}.si-p{background:var(--rec3)}.si-o{background:#FFF7ED}
+.sv{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:var(--g1);line-height:1}
+.sv.purple{color:var(--rec)}
+.sl{font-size:.77rem;color:var(--muted);margin-top:2px}
+
+.card{background:#fff;border-radius:var(--r2);border:1px solid var(--border);overflow:hidden;margin-bottom:20px}
+.ch{padding:15px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;background:var(--surface)}
+.ch h3{font-weight:600;font-size:.95rem;color:var(--text)}
+.cb{padding:0}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.83rem}
+th{text-align:left;padding:10px 16px;font-weight:600;color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;background:var(--surface);border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:11px 16px;border-bottom:1px solid var(--border);vertical-align:middle;color:var(--text)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--off)}
+td strong{font-weight:600;color:var(--g1)}
+
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:700;letter-spacing:.03em;text-transform:capitalize}
+.bg-g{background:var(--g6);color:var(--g1)}.bg-a{background:#FEF3C7;color:#92400E}
+.bg-r{background:#FEE2E2;color:#991B1B}.bg-b{background:#DBEAFE;color:#1E40AF}
+.bg-p{background:var(--rec3);color:var(--rec2)}.bg-gr{background:#F3F4F6;color:#374151}
+.bg-o{background:#FFF7ED;color:#9A3412}
+
+.empty{text-align:center;padding:50px 20px;color:var(--muted)}
+.empty-e{font-size:2.8rem;margin-bottom:12px;opacity:.55}
+.empty p{font-size:.87rem;max-width:260px;margin:0 auto;line-height:1.5}
+
+/* ── RECIPIENT FOOD CARDS ── */
+.food-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px;padding:18px}
+.food-card{background:#fff;border:1px solid var(--border);border-radius:18px;overflow:hidden;transition:all .25s;position:relative}
+.food-card:hover{transform:translateY(-4px);box-shadow:var(--sh2)}
+.food-card-top{padding:18px 18px 12px;border-bottom:1px solid var(--border)}
+.food-card-cat{display:inline-flex;align-items:center;gap:5px;background:var(--g6);color:var(--g1);font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:20px;margin-bottom:10px;text-transform:capitalize}
+.food-card h4{font-size:1.05rem;font-weight:700;color:var(--g1);margin-bottom:5px;line-height:1.3}
+.food-card-qty{font-size:.88rem;color:var(--muted);display:flex;align-items:center;gap:5px}
+.food-card-qty strong{color:var(--g2);font-weight:600}
+.food-card-bot{padding:12px 18px;display:flex;flex-direction:column;gap:6px}
+.food-info-row{display:flex;align-items:center;gap:7px;font-size:.82rem;color:var(--muted)}
+.food-info-row span:first-child{font-size:.9rem}
+.food-card-fresh{position:absolute;top:12px;right:12px}
+.freshness-dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+.dot-good{background:#22C55E}.dot-soon{background:#EAB308}.dot-urgent{background:#EF4444}
+
+/* ── RECIPIENT EVENT CARDS ── */
+.event-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px;padding:18px}
+.ev-card{background:#fff;border:1px solid var(--border);border-radius:18px;padding:18px;transition:all .25s}
+.ev-card:hover{transform:translateY(-3px);box-shadow:var(--sh2)}
+.ev-card-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+.ev-card h4{font-size:.97rem;font-weight:700;color:var(--g1);line-height:1.3;max-width:70%}
+.ev-meta{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+.ev-meta-row{display:flex;align-items:center;gap:7px;font-size:.82rem;color:var(--muted)}
+.ev-meta-row span:first-child{font-size:.95rem;width:18px}
+
+/* ══ ADMIN ══ */
+.admin-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}
+.at{padding:7px 17px;border-radius:30px;border:1.5px solid var(--border);background:#fff;font-family:'DM Sans',sans-serif;font-size:.83rem;font-weight:500;cursor:pointer;transition:all .2s;color:var(--text)}
+.at.on{background:var(--g2);color:#fff;border-color:var(--g2)}
+
+/* ══ SPINNER / TOAST ══ */
+.spin{display:inline-block;width:16px;height:16px;border:2.5px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:spin .55s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#toast{position:fixed;bottom:26px;right:26px;z-index:9999;display:flex;flex-direction:column;gap:9px;max-width:310px}
+.t-item{background:var(--g1);color:#fff;padding:11px 16px;border-radius:12px;font-size:.86rem;box-shadow:0 8px 28px rgba(0,0,0,.24);display:flex;align-items:center;gap:9px;animation:tIn .3s ease;border-left:4px solid var(--g4)}
+.t-item.err{background:#1F1F1F;border-left-color:#EF4444}
+.t-item.rec{border-left-color:var(--rec)}
+@keyframes tIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+
+/* ══ RESPONSIVE ══ */
+@media(max-width:768px){
+  .live-stats{grid-template-columns:1fr 1fr}
+  .ls-item{border-right:none;border-bottom:1px solid var(--border)}
+  .ls-item:nth-child(odd){border-right:1px solid var(--border)}
+  .ls-item:nth-last-child(-n+2):nth-child(odd){border-bottom:none}
+  .ls-item:last-child{border-bottom:none}
+  .row2,.row3{grid-template-columns:1fr}
+  .modal{padding:26px 20px}
+  .nav-right .uname-nav{display:none}
+  th:nth-child(n+5),td:nth-child(n+5){display:none}
+  .rec-hero-card{flex-direction:column;text-align:center}
+}
+@media(max-width:480px){
+  .sg{grid-template-columns:1fr 1fr}
+  .hero h1{font-size:2.1rem}
+  .food-grid,.event-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div id="toast"></div>
+
+<!-- ══════════════ NAVBAR ══════════════ -->
+<nav class="nav">
+  <div class="nav-brand" onclick="goHome()">
+    <div class="nav-logo">🌿</div>
+    <span class="nav-name">FoodShare</span>
+  </div>
+  <div class="nav-right" id="navR">
+    <button class="nb" onclick="openM('login')">Login</button>
+    <button class="nb rec-btn" onclick="openM('rec-login')">🧑‍🤝‍🧑 I Need Food</button>
+    <button class="nb cta" onclick="openM('reg')">Join Us</button>
+  </div>
+</nav>
+
+<!-- ══════════════ LANDING ══════════════ -->
+<div id="p-land" class="page on">
+  <section class="hero">
+    <div class="blob1"></div><div class="blob2"></div>
+    <span class="hero-badge">🌍 Sustainable Community Initiative</span>
+    <h1>No Food Should<br/><em>Ever Go to Waste</em></h1>
+    <p>Connecting restaurants, NGOs, food banks, and volunteers to ensure every surplus meal reaches a family in need.</p>
+    <div class="hero-btns">
+      <button class="btn btn-white" onclick="openM('reg')">🤝 Register as Donor / NGO</button>
+      <button class="btn btn-amb" onclick="openM('login')">📦 Donor Dashboard</button>
+      <button class="btn btn-rec" onclick="openM('rec-login')">🧑‍🤝‍🧑 I Need Food</button>
+    </div>
+    <div class="rec-hero-card">
+      <span class="rec-hero-icon">🙏</span>
+      <div>
+        <h4>Are you looking for food assistance?</h4>
+        <p>Register as a recipient for free — no approval needed. Browse available food donations and upcoming distribution events in your city.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="live-stats">
+    <div class="ls-item"><div class="ls-val" id="ls1">—</div><div class="ls-lbl">Available Donations</div></div>
+    <div class="ls-item"><div class="ls-val" id="ls2">—</div><div class="ls-lbl">Deliveries Done</div></div>
+    <div class="ls-item"><div class="ls-val" id="ls3">—</div><div class="ls-lbl">Families Helped</div></div>
+    <div class="ls-item"><div class="ls-val" id="ls4">—</div><div class="ls-lbl">Events Pending</div></div>
+  </div>
+
+  <div class="section">
+    <h2 class="sec-title">How FoodShare Works</h2>
+    <p class="sec-sub">A complete ecosystem for community food distribution</p>
+    <div class="how-grid">
+      <div class="how-card"><div class="how-icon">🍱</div><h4>Log Surplus Food</h4><p>Restaurants & donors post available food with quantity, expiry, and pickup details in seconds.</p></div>
+      <div class="how-card"><div class="how-icon">🗓️</div><h4>Schedule Deliveries</h4><p>NGOs coordinate pickups, assign volunteers, and link donations to distribution events.</p></div>
+      <div class="how-card"><div class="how-icon">🧑‍🤝‍🧑</div><h4>Recipients Browse Food</h4><p>Registered recipients can view all available food donations and find upcoming distribution events near them.</p></div>
+      <div class="how-card"><div class="how-icon">📊</div><h4>Live Dashboard</h4><p>Role-specific dashboards give every stakeholder real-time visibility into what matters to them.</p></div>
+      <div class="how-card"><div class="how-icon">🛡️</div><h4>Verified Network</h4><p>Organizations are admin-verified. Recipients self-register for instant access.</p></div>
+      <div class="how-card"><div class="how-icon">📱</div><h4>Mobile First</h4><p>Works perfectly on any smartphone, tablet, or desktop — no app download needed.</p></div>
+    </div>
+  </div>
+
+  <section class="roles-bg">
+    <h2 class="sec-title">Who Can Join?</h2>
+    <p class="sec-sub" style="color:rgba(255,255,255,.7)">Pick the role that fits you</p>
+    <div class="roles-grid">
+      <div class="role-card" onclick="regAs('restaurant')"><span class="role-emoji">🍽️</span><h4>Restaurants</h4><p>Log surplus meals and cooked food</p></div>
+      <div class="role-card" onclick="regAs('ngo')"><span class="role-emoji">🏛️</span><h4>NGOs</h4><p>Coordinate food distribution</p></div>
+      <div class="role-card" onclick="regAs('food_bank')"><span class="role-emoji">🏪</span><h4>Food Banks</h4><p>Receive and store donations</p></div>
+      <div class="role-card" onclick="regAs('volunteer')"><span class="role-emoji">🙌</span><h4>Volunteers</h4><p>Help with pickups & deliveries</p></div>
+      <div class="role-card rec-card" onclick="openM('rec-reg')"><span class="role-emoji">🧑‍🤝‍🧑</span><h4>Recipients</h4><p>Browse food & find events — instant access</p></div>
+    </div>
+  </section>
+  <footer><strong>🌿 FoodShare</strong> — Sustainable Community Food Distribution System<br><span style="opacity:.5;font-size:.78rem;margin-top:6px;display:block">Fighting food waste, one meal at a time ♻️</span></footer>
+</div>
+
+<!-- ══════════════ RECIPIENT PORTAL ══════════════ -->
+<div id="p-recipient" class="page">
+  <div class="dash">
+    <div class="rec-welcome">
+      <span class="rec-welcome-icon">🙏</span>
+      <div>
+        <h3 id="recWelcomeName">Welcome!</h3>
+        <p>Browse available food donations and upcoming distribution events below. All listings are updated in real time.</p>
+      </div>
+    </div>
+    <div class="sg" id="recStats"></div>
+    <div class="tab-bar">
+      <button class="tab on rec-tab" onclick="recTab('food',this)">🍱 Available Food</button>
+      <button class="tab" onclick="recTab('events',this)">📅 Distribution Events</button>
+    </div>
+    <div id="rt-food"></div>
+    <div id="rt-events" style="display:none"></div>
+  </div>
+</div>
+
+<!-- ══════════════ DONOR/ORG DASHBOARD ══════════════ -->
+<div id="p-dash" class="page">
+  <div class="dash">
+    <div class="dash-hdr">
+      <h2 id="dTitle">Dashboard</h2>
+      <p id="dSub">Loading...</p>
+    </div>
+    <div class="sg" id="dStats"></div>
+    <div class="tab-bar">
+      <button class="tab on" onclick="dTab('don',this)">🍱 Donations</button>
+      <button class="tab" onclick="dTab('ev',this)">📅 Events</button>
+      <button class="tab" onclick="dTab('ben',this)">👥 Beneficiaries</button>
+    </div>
+    <div id="dt-don"></div>
+    <div id="dt-ev"  style="display:none"></div>
+    <div id="dt-ben" style="display:none"></div>
+  </div>
+</div>
+
+<!-- ══════════════ ADMIN PANEL ══════════════ -->
+<div id="p-admin" class="page">
+  <div class="dash">
+    <div class="dash-hdr"><h2>🛡️ Admin Control Panel</h2><p>Manage users, monitor all activity across the system</p></div>
+    <div class="sg" id="aStats"></div>
+    <div class="admin-tabs">
+      <button class="at on" onclick="aTab('users',this)">👤 Users</button>
+      <button class="at" onclick="aTab('don',this)">🍱 Donations</button>
+      <button class="at" onclick="aTab('ev',this)">📅 Events</button>
+      <button class="at" onclick="aTab('ben',this)">👥 Beneficiaries</button>
+      <button class="at" onclick="aTab('log',this)">📋 Activity</button>
+    </div>
+    <div id="ap-users"></div>
+    <div id="ap-don"  style="display:none"></div>
+    <div id="ap-ev"   style="display:none"></div>
+    <div id="ap-ben"  style="display:none"></div>
+    <div id="ap-log"  style="display:none"></div>
+  </div>
+</div>
+
+<!-- ════════════════ MODALS ════════════════ -->
+
+<!-- Donor/Org Login -->
+<div class="overlay" id="m-login">
+  <div class="modal">
+    <button class="modal-x" onclick="closeM('login')">✕</button>
+    <div class="modal-h">Welcome Back 👋</div>
+    <div class="modal-s">Donor / NGO / Volunteer login</div>
+    <div id="la"></div>
+    <div class="fg"><label>Email</label><input type="email" id="le" placeholder="you@example.com" onkeypress="if(event.key==='Enter')doLogin()"/></div>
+    <div class="fg"><label>Password</label><input type="password" id="lp" placeholder="••••••••" onkeypress="if(event.key==='Enter')doLogin()"/></div>
+    <button class="btn btn-green" style="width:100%;justify-content:center;margin-top:6px" onclick="doLogin()" id="lBtn">Sign In →</button>
+    <div style="margin-top:16px;padding:10px 14px;background:var(--surface);border-radius:9px;font-size:.77rem;color:var(--muted)">
+      🔑 <strong>Admin:</strong> admin@foodshare.org / Admin@123<br>
+      🍽️ <strong>Demo:</strong> demo@restaurant.com / Demo@123
+    </div>
+    <p style="text-align:center;margin-top:14px;font-size:.84rem;color:var(--muted)">Are you looking for food? <a href="#" onclick="switchM('login','rec-login')" style="color:var(--rec);font-weight:600">Recipient login →</a></p>
+  </div>
+</div>
+
+<!-- Recipient Login -->
+<div class="overlay" id="m-rec-login">
+  <div class="modal">
+    <button class="modal-x" onclick="closeM('rec-login')">✕</button>
+    <div class="modal-h purple">🧑‍🤝‍🧑 Recipient Login</div>
+    <div class="modal-s">Access available food donations in your area</div>
+    <div id="rla"></div>
+    <div class="alert alert-rec">✅ Recipients are automatically approved — no waiting!</div>
+    <div class="fg"><label>Email</label><input type="email" id="rle" placeholder="you@example.com" class="purple-focus" onkeypress="if(event.key==='Enter')doRecLogin()"/></div>
+    <div class="fg"><label>Password</label><input type="password" id="rlp" placeholder="••••••••" class="purple-focus" onkeypress="if(event.key==='Enter')doRecLogin()"/></div>
+    <button class="btn btn-purple" style="width:100%;justify-content:center;margin-top:6px" onclick="doRecLogin()" id="rlBtn">View Available Food →</button>
+    <div style="margin-top:14px;padding:10px 14px;background:var(--rec3);border-radius:9px;font-size:.77rem;color:var(--rec2)">
+      🧑‍🤝‍🧑 <strong>Demo:</strong> recipient@demo.com / Demo@123
+    </div>
+    <p style="text-align:center;margin-top:14px;font-size:.84rem;color:var(--muted)">No account? <a href="#" onclick="switchM('rec-login','rec-reg')" style="color:var(--rec);font-weight:600">Register free →</a></p>
+  </div>
+</div>
+
+<!-- Recipient Register -->
+<div class="overlay" id="m-rec-reg">
+  <div class="modal">
+    <button class="modal-x" onclick="closeM('rec-reg')">✕</button>
+    <div class="modal-h purple">Register as Recipient 🙏</div>
+    <div class="modal-s">Free registration — instant access, no approval needed</div>
+    <div id="rra"></div>
+    <div class="alert alert-rec">✅ Your account will be active immediately after registration.</div>
+    <div class="row2">
+      <div class="fg"><label>Full Name *</label><input type="text" id="rrn" placeholder="Your name" class="purple-focus"/></div>
+      <div class="fg"><label>Phone</label><input type="tel" id="rrph" placeholder="+91 99999 99999"/></div>
+    </div>
+    <div class="fg"><label>Email *</label><input type="email" id="rre" placeholder="you@example.com" class="purple-focus"/></div>
+    <div class="fg"><label>Password * (min 6 chars)</label><input type="password" id="rrp" placeholder="Create a password" class="purple-focus"/></div>
+    <div class="row2">
+      <div class="fg"><label>City *</label><input type="text" id="rrci" placeholder="Chennai" class="purple-focus"/></div>
+      <div class="fg"><label>Area / Address</label><input type="text" id="rrad" placeholder="Your area"/></div>
+    </div>
+    <button class="btn btn-purple" style="width:100%;justify-content:center;margin-top:6px" onclick="doRecReg()" id="rrBtn">Register & Browse Food →</button>
+    <p style="text-align:center;margin-top:14px;font-size:.84rem;color:var(--muted)">Already registered? <a href="#" onclick="switchM('rec-reg','rec-login')" style="color:var(--rec);font-weight:600">Sign in</a></p>
+  </div>
+</div>
+
+<!-- Org Register -->
+<div class="overlay" id="m-reg">
+  <div class="modal modal-wide">
+    <button class="modal-x" onclick="closeM('reg')">✕</button>
+    <div class="modal-h">Join FoodShare 🌿</div>
+    <div class="modal-s">Register your organisation — admin approval required</div>
+    <div id="oa"></div>
+    <div class="row2">
+      <div class="fg"><label>Full Name *</label><input type="text" id="rn" placeholder="Jane Smith"/></div>
+      <div class="fg"><label>Role *</label>
+        <select id="rr">
+          <option value="">— Select role —</option>
+          <option value="restaurant">🍽️ Restaurant</option>
+          <option value="ngo">🏛️ NGO</option>
+          <option value="food_bank">🏪 Food Bank</option>
+          <option value="volunteer">🙌 Volunteer</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg"><label>Email *</label><input type="email" id="re" placeholder="you@example.com"/></div>
+    <div class="fg"><label>Password * (min 6 chars)</label><input type="password" id="rp" placeholder="Create a strong password"/></div>
+    <div class="row2">
+      <div class="fg"><label>Organisation Name</label><input type="text" id="ro" placeholder="Organisation / Restaurant"/></div>
+      <div class="fg"><label>Phone</label><input type="tel" id="rph" placeholder="+91 99999 99999"/></div>
+    </div>
+    <div class="row2">
+      <div class="fg"><label>City</label><input type="text" id="rci" placeholder="Chennai"/></div>
+      <div class="fg"><label>Address</label><input type="text" id="rad" placeholder="Street / Area"/></div>
+    </div>
+    <button class="btn btn-green" style="width:100%;justify-content:center;margin-top:6px" onclick="doOrgReg()" id="orgBtn">Create Account →</button>
+    <p style="text-align:center;margin-top:14px;font-size:.84rem;color:var(--muted)">Need food instead? <a href="#" onclick="switchM('reg','rec-reg')" style="color:var(--rec);font-weight:600">Recipient registration →</a></p>
+  </div>
+</div>
+
+<!-- Add Donation -->
+<div class="overlay" id="m-don">
+  <div class="modal modal-wide">
+    <button class="modal-x" onclick="closeM('don')">✕</button>
+    <div class="modal-h">Log Food Donation 🍱</div>
+    <div class="modal-s">Enter details about the surplus food available for pickup</div>
+    <div id="da"></div>
+    <div class="row2">
+      <div class="fg"><label>Food Name *</label><input type="text" id="df" placeholder="e.g. Biryani, Rice & Dal"/></div>
+      <div class="fg"><label>Category *</label>
+        <select id="dc">
+          <option value="cooked">🍛 Cooked Meal</option><option value="raw">🌾 Raw Ingredients</option>
+          <option value="packaged">📦 Packaged Food</option><option value="bakery">🍞 Bakery</option>
+          <option value="produce">🥦 Fresh Produce</option><option value="dairy">🥛 Dairy</option>
+          <option value="beverages">🧃 Beverages</option><option value="other">📋 Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="row3">
+      <div class="fg"><label>Quantity *</label><input type="number" id="dq" placeholder="50" min="1" step="0.5"/></div>
+      <div class="fg"><label>Unit *</label>
+        <select id="du"><option value="kg">kg</option><option value="litres">litres</option><option value="servings">servings</option><option value="packets">packets</option><option value="boxes">boxes</option><option value="pieces">pieces</option><option value="bags">bags</option></select>
+      </div>
+      <div class="fg"><label>Expiry Date</label><input type="date" id="de"/></div>
+    </div>
+    <div class="fg"><label>Pickup Address</label><input type="text" id="dp" placeholder="Where should volunteers collect from?"/></div>
+    <div class="fg"><label>Notes</label><textarea id="dd" placeholder="Allergens, handling instructions, contact..."></textarea></div>
+    <button class="btn btn-green" style="width:100%;justify-content:center" onclick="subDon()" id="dBtn">Submit Donation →</button>
+  </div>
+</div>
+
+<!-- Add Event -->
+<div class="overlay" id="m-ev">
+  <div class="modal modal-wide">
+    <button class="modal-x" onclick="closeM('ev')">✕</button>
+    <div class="modal-h">Schedule Distribution 📅</div>
+    <div class="modal-s">Set up a food pickup or delivery event</div>
+    <div id="ea"></div>
+    <div class="fg"><label>Event Title *</label><input type="text" id="et" placeholder="e.g. Weekly Rice Distribution — Adyar"/></div>
+    <div class="row2">
+      <div class="fg"><label>Date *</label><input type="date" id="ed"/></div>
+      <div class="fg"><label>Time</label><input type="time" id="eti"/></div>
+    </div>
+    <div class="fg"><label>Link to Donation</label><select id="edon"><option value="">— None —</option></select></div>
+    <div class="row2">
+      <div class="fg"><label>Assign Volunteer</label><select id="evol"><option value="">— None —</option></select></div>
+      <div class="fg"><label>Beneficiary</label><select id="eben"><option value="">— None —</option></select></div>
+    </div>
+    <div class="row2">
+      <div class="fg"><label>Pickup Location</label><input type="text" id="epu" placeholder="Pickup address"/></div>
+      <div class="fg"><label>Delivery Location</label><input type="text" id="edl" placeholder="Drop-off address"/></div>
+    </div>
+    <div class="fg"><label>Notes</label><textarea id="en" placeholder="Instructions for volunteers..."></textarea></div>
+    <button class="btn btn-green" style="width:100%;justify-content:center" onclick="subEv()" id="eBtn">Schedule Event →</button>
+  </div>
+</div>
+
+<!-- Add Beneficiary -->
+<div class="overlay" id="m-ben">
+  <div class="modal modal-wide">
+    <button class="modal-x" onclick="closeM('ben')">✕</button>
+    <div class="modal-h">Register Beneficiary 👨‍👩‍👧</div>
+    <div class="modal-s">Add a family or individual to receive food assistance</div>
+    <div id="ba"></div>
+    <div class="row2">
+      <div class="fg"><label>Full Name *</label><input type="text" id="bn" placeholder="Family head / org name"/></div>
+      <div class="fg"><label>Contact</label><input type="tel" id="bc" placeholder="+91 99999 99999"/></div>
+    </div>
+    <div class="fg"><label>Full Address *</label><input type="text" id="bad" placeholder="Complete delivery address"/></div>
+    <div class="row2">
+      <div class="fg"><label>City</label><input type="text" id="bci" placeholder="City"/></div>
+      <div class="fg"><label>Family Size</label><input type="number" id="bf" placeholder="Members" min="1" value="1"/></div>
+    </div>
+    <div class="fg"><label>Special Needs</label><textarea id="bne" placeholder="Dietary restrictions, medical, preferred items..."></textarea></div>
+    <button class="btn btn-green" style="width:100%;justify-content:center" onclick="subBen()" id="bBtn">Register →</button>
+  </div>
+</div>
+
+<!-- ════════════════ SCRIPT ════════════════ -->
+<script>
+const API='/api';
+let _tok=localStorage.getItem('fs_tok');
+let _usr=JSON.parse(localStorage.getItem('fs_usr')||'null');
+
+const $=id=>document.getElementById(id);
+const api=async(path,method='GET',body=null)=>{
+  const h={'Content-Type':'application/json'};
+  if(_tok)h['Authorization']='Bearer '+_tok;
+  const r=await fetch(API+path,{method,headers:h,body:body?JSON.stringify(body):null});
+  return r.json();
+};
+
+function toast(msg,type='ok'){
+  const el=document.createElement('div');
+  el.className=`t-item ${type}`;
+  el.innerHTML=`<span>${type==='err'?'❌':type==='rec'?'🙏':'✅'}</span><span>${msg}</span>`;
+  $('toast').appendChild(el);
+  setTimeout(()=>el.style.opacity='0',3200);
+  setTimeout(()=>el.remove(),3600);
+}
+const setA=(id,msg,type='err')=>$(id).innerHTML=`<div class="alert alert-${type}">${msg}</div>`;
+const clrA=id=>$(id).innerHTML='';
+
+const fmtDate=d=>d?new Date(d).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}):'—';
+const SBADGE={available:'bg-g',scheduled:'bg-a',collected:'bg-b',distributed:'bg-p',expired:'bg-r',
+  pending:'bg-a',in_progress:'bg-b',completed:'bg-g',cancelled:'bg-r'};
+const badge=(s)=>`<span class="badge ${SBADGE[s]||'bg-gr'}">${(s||'').replace('_',' ')}</span>`;
+const roleBadge=r=>{const m={admin:'bg-p',ngo:'bg-b',food_bank:'bg-g',restaurant:'bg-a',volunteer:'bg-gr',recipient:'bg-p'};return`<span class="badge ${m[r]||'bg-gr'}">${(r||'').replace('_',' ')}</span>`;};
+
+/* ── Page routing ── */
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  $('p-'+name).classList.add('on');
+  window.scrollTo(0,0);
+}
+function goHome(){
+  if(!_usr){showPage('land');return;}
+  if(_usr.role==='admin') loadAdmin();
+  else if(_usr.role==='recipient') loadRecipient();
+  else loadDash();
+}
+
+/* ── Modals ── */
+function openM(n){$('m-'+n).classList.add('on');}
+function closeM(n){$('m-'+n).classList.remove('on');}
+function switchM(a,b){closeM(a);openM(b);}
+document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('on');}));
+function regAs(role){openM('reg');setTimeout(()=>{$('rr').value=role;},50);}
+
+/* ── Navbar ── */
+function renderNav(){
+  const nav=$('navR');
+  if(_usr){
+    const isA=_usr.role==='admin', isR=_usr.role==='recipient';
+    const avCls=isR?'av-r':isA?'av-p':'av-g';
+    nav.innerHTML=`
+      <div class="uavatar ${avCls}">${_usr.name[0].toUpperCase()}</div>
+      <span class="uname-nav">${_usr.name}</span>
+      ${isA?`<button class="nb act" onclick="loadAdmin()">Admin</button>`:''}
+      ${isR?`<button class="nb rec-btn" onclick="loadRecipient()">My Portal</button>`:`<button class="nb" onclick="loadDash()">Dashboard</button>`}
+      <button class="nb danger" onclick="doLogout()">Logout</button>
+    `;
+  } else {
+    nav.innerHTML=`
+      <button class="nb" onclick="openM('login')">Login</button>
+      <button class="nb rec-btn" onclick="openM('rec-login')">🧑‍🤝‍🧑 I Need Food</button>
+      <button class="nb cta" onclick="openM('reg')">Join Us</button>
+    `;
+  }
+}
+
+/* ══ AUTH ══ */
+async function doLogin(){
+  clrA('la');
+  const email=$('le').value.trim(),pass=$('lp').value;
+  if(!email||!pass)return setA('la','Please enter email and password');
+  $('lBtn').innerHTML='<span class="spin"></span>';$('lBtn').disabled=true;
+  try{
+    const r=await api('/auth/login','POST',{email,password:pass});
+    if(r.error){setA('la',r.error);return;}
+    if(r.user.role==='recipient'){setA('la','Please use the Recipient Login button');return;}
+    _tok=r.token;_usr=r.user;
+    localStorage.setItem('fs_tok',_tok);localStorage.setItem('fs_usr',JSON.stringify(_usr));
+    closeM('login');renderNav();toast(`Welcome, ${_usr.name}! 👋`);
+    if(_usr.role==='admin')loadAdmin();else loadDash();
+  }catch{setA('la','Connection error. Please try again.');}
+  finally{$('lBtn').innerHTML='Sign In →';$('lBtn').disabled=false;}
+}
+
+async function doRecLogin(){
+  clrA('rla');
+  const email=$('rle').value.trim(),pass=$('rlp').value;
+  if(!email||!pass)return setA('rla','Please enter email and password');
+  $('rlBtn').innerHTML='<span class="spin"></span>';$('rlBtn').disabled=true;
+  try{
+    const r=await api('/auth/login','POST',{email,password:pass});
+    if(r.error){setA('rla',r.error,'err');return;}
+    if(r.user.role!=='recipient'){setA('rla','This login is for recipients only. Use the main Login button.','err');return;}
+    _tok=r.token;_usr=r.user;
+    localStorage.setItem('fs_tok',_tok);localStorage.setItem('fs_usr',JSON.stringify(_usr));
+    closeM('rec-login');renderNav();
+    toast(`Welcome, ${_usr.name}! Browse available food below 🙏`,'rec');
+    loadRecipient();
+  }catch{setA('rla','Connection error. Please try again.');}
+  finally{$('rlBtn').innerHTML='View Available Food →';$('rlBtn').disabled=false;}
+}
+
+async function doRecReg(){
+  clrA('rra');
+  const data={
+    name:$('rrn').value.trim(),role:'recipient',
+    email:$('rre').value.trim(),password:$('rrp').value,
+    phone:$('rrph').value.trim(),city:$('rrci').value.trim(),address:$('rrad').value.trim()
+  };
+  if(!data.name||!data.email||!data.password||!data.city)
+    return setA('rra','Name, email, password and city are required','err');
+  $('rrBtn').innerHTML='<span class="spin"></span>';$('rrBtn').disabled=true;
+  try{
+    const r=await api('/auth/register','POST',data);
+    if(r.error){setA('rra',r.error,'err');return;}
+    setA('rra','✅ '+r.message,'rec');
+    toast('Account created! Logging you in...','rec');
+    /* Auto-login */
+    setTimeout(async()=>{
+      const lr=await api('/auth/login','POST',{email:data.email,password:data.password});
+      if(lr.token){
+        _tok=lr.token;_usr=lr.user;
+        localStorage.setItem('fs_tok',_tok);localStorage.setItem('fs_usr',JSON.stringify(_usr));
+        closeM('rec-reg');renderNav();loadRecipient();
+      }
+    },1200);
+  }catch{setA('rra','Error. Please try again.','err');}
+  finally{$('rrBtn').innerHTML='Register & Browse Food →';$('rrBtn').disabled=false;}
+}
+
+async function doOrgReg(){
+  clrA('oa');
+  const data={name:$('rn').value.trim(),role:$('rr').value,email:$('re').value.trim(),password:$('rp').value,organization:$('ro').value.trim(),phone:$('rph').value.trim(),city:$('rci').value.trim(),address:$('rad').value.trim()};
+  if(!data.name||!data.email||!data.password||!data.role)return setA('oa','Please fill all required fields');
+  $('orgBtn').innerHTML='<span class="spin"></span>';$('orgBtn').disabled=true;
+  try{
+    const r=await api('/auth/register','POST',data);
+    if(r.error){setA('oa',r.error);return;}
+    setA('oa','✅ '+r.message,'ok');
+    toast('Registration submitted! Await admin approval.');
+    setTimeout(()=>switchM('reg','login'),2200);
+  }catch{setA('oa','Error. Please try again.');}
+  finally{$('orgBtn').innerHTML='Create Account →';$('orgBtn').disabled=false;}
+}
+
+function doLogout(){
+  _tok=null;_usr=null;
+  localStorage.removeItem('fs_tok');localStorage.removeItem('fs_usr');
+  renderNav();showPage('land');loadLandStats();toast('Logged out');
+}
+
+/* ══ LANDING STATS ══ */
+async function loadLandStats(){
+  try{
+    if(!_tok){$('ls1').textContent=$('ls2').textContent=$('ls3').textContent=$('ls4').textContent='—';return;}
+    const s=await api('/stats');
+    $('ls1').textContent=s.available_donations??0;$('ls2').textContent=s.completed_deliveries??0;
+    $('ls3').textContent=s.beneficiaries??0;$('ls4').textContent=s.pending_deliveries??0;
+  }catch{}
+}
+
+/* ══ RECIPIENT PORTAL ══ */
+async function loadRecipient(){
+  showPage('recipient');
+  $('recWelcomeName').textContent=`Welcome, ${_usr.name}! 🙏`;
+  try{
+    const s=await api('/stats');
+    $('recStats').innerHTML=`
+      <div class="sc"><div class="si si-g">🍱</div><div><div class="sv purple">${s.available_donations||0}</div><div class="sl">Foods Available Now</div></div></div>
+      <div class="sc"><div class="si si-p">📅</div><div><div class="sv purple">${s.pending_deliveries||0}</div><div class="sl">Upcoming Events</div></div></div>
+      <div class="sc"><div class="si si-b">👨‍👩‍👧</div><div><div class="sv purple">${s.beneficiaries||0}</div><div class="sl">Families Served</div></div></div>
+      <div class="sc"><div class="si si-a">✅</div><div><div class="sv purple">${s.completed_deliveries||0}</div><div class="sl">Distributions Done</div></div></div>
+    `;
+    loadLandStats();
+  }catch{}
+  loadRecFood();
+}
+
+let _recTab='food';
+function recTab(name,btn){
+  _recTab=name;
+  ['food','events'].forEach(t=>$('rt-'+t).style.display=t===name?'block':'none');
+  document.querySelectorAll('#p-recipient .tab').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  if(name==='food')loadRecFood();
+  if(name==='events')loadRecEvents();
+}
+
+/* Freshness helper */
+function freshness(expiry){
+  if(!expiry)return{cls:'dot-good',label:'Good'};
+  const days=Math.ceil((new Date(expiry)-new Date())/(1000*60*60*24));
+  if(days<0)return{cls:'dot-urgent',label:'Expired'};
+  if(days<=1)return{cls:'dot-urgent',label:'Today!'};
+  if(days<=3)return{cls:'dot-soon',label:`${days}d left`};
+  return{cls:'dot-good',label:`${days}d left`};
+}
+
+const CAT_ICON={cooked:'🍛',raw:'🌾',packaged:'📦',bakery:'🍞',produce:'🥦',dairy:'🥛',beverages:'🧃',other:'📋'};
+
+async function loadRecFood(){
+  $('rt-food').innerHTML=`<div class="card"><div class="ch"><h3>Available Food Donations</h3><span style="font-size:.8rem;color:var(--muted)">Updated in real-time</span></div><div class="cb"><div class="food-grid" id="foodGrid"><div class="empty"><div class="empty-e">⏳</div><p>Loading...</p></div></div></div></div>`;
+  try{
+    const rows=await api('/donations');
+    const grid=$('foodGrid');
+    if(!rows.length){grid.innerHTML=`<div class="empty" style="grid-column:1/-1"><div class="empty-e">🍱</div><p>No food donations available right now.<br>Check back soon!</p></div>`;return;}
+    grid.innerHTML=rows.map(d=>{
+      const fr=freshness(d.expiry_date);
+      return`<div class="food-card">
+        <div class="food-card-top">
+          <div class="food-card-fresh"><span class="freshness-dot ${fr.cls}" title="${fr.label}"></span> <span style="font-size:.72rem;color:var(--muted)">${fr.label}</span></div>
+          <div class="food-card-cat">${CAT_ICON[d.category]||'📋'} ${d.category}</div>
+          <h4>${d.food_name}</h4>
+          <div class="food-card-qty">Available: <strong>${d.quantity} ${d.unit}</strong></div>
+        </div>
+        <div class="food-card-bot">
+          <div class="food-info-row"><span>🏢</span><span>${d.organization||d.donor_name||'Anonymous donor'}</span></div>
+          ${d.pickup_address?`<div class="food-info-row"><span>📍</span><span>${d.pickup_address}</span></div>`:''}
+          ${d.expiry_date?`<div class="food-info-row"><span>📅</span><span>Best before ${fmtDate(d.expiry_date)}</span></div>`:''}
+          ${d.description?`<div class="food-info-row"><span>📝</span><span style="font-size:.8rem">${d.description}</span></div>`:''}
+          <div style="margin-top:8px">${badge('available')}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }catch{$('foodGrid').innerHTML=`<div class="empty" style="grid-column:1/-1"><div class="empty-e">⚠️</div><p>Error loading donations</p></div>`;}
+}
+
+async function loadRecEvents(){
+  $('rt-events').innerHTML=`<div class="card"><div class="ch"><h3>Upcoming Distribution Events</h3><span style="font-size:.8rem;color:var(--muted)">Find food distribution near you</span></div><div class="cb"><div class="event-grid" id="evGrid"><div class="empty"><div class="empty-e">⏳</div><p>Loading events...</p></div></div></div></div>`;
+  try{
+    const rows=await api('/events');
+    const grid=$('evGrid');
+    if(!rows.length){grid.innerHTML=`<div class="empty" style="grid-column:1/-1"><div class="empty-e">📅</div><p>No upcoming events right now.<br>Check back soon!</p></div>`;return;}
+    grid.innerHTML=rows.map(e=>`
+      <div class="ev-card">
+        <div class="ev-card-head">
+          <h4>${e.title}</h4>
+          ${badge(e.status)}
+        </div>
+        <div class="ev-meta">
+          <div class="ev-meta-row"><span>📅</span><span>${fmtDate(e.scheduled_date)}${e.scheduled_time?' at '+e.scheduled_time:''}</span></div>
+          ${e.food_name?`<div class="ev-meta-row"><span>🍱</span><span>${e.food_name} — ${e.food_qty} ${e.food_unit}</span></div>`:''}
+          ${e.delivery_location?`<div class="ev-meta-row"><span>📍</span><span>${e.delivery_location}</span></div>`:''}
+          ${e.organizer_org?`<div class="ev-meta-row"><span>🏛️</span><span>By ${e.organizer_org}</span></div>`:''}
+          ${e.notes?`<div class="ev-meta-row"><span>📝</span><span style="font-size:.8rem">${e.notes}</span></div>`:''}
+        </div>
+      </div>`).join('');
+  }catch{}
+}
+
+/* ══ DONOR DASHBOARD ══ */
+async function loadDash(){
+  showPage('dash');
+  const icons={restaurant:'🍽️',ngo:'🏛️',food_bank:'🏪',volunteer:'🙌'};
+  $('dTitle').textContent=`${icons[_usr.role]||'👤'} ${_usr.name}`;
+  $('dSub').textContent=`${_usr.organization?_usr.organization+' · ':''}${_usr.role.replace('_',' ')} account`;
+  try{
+    const s=await api('/stats');
+    $('dStats').innerHTML=`
+      <div class="sc"><div class="si si-g">🍱</div><div><div class="sv">${s.available_donations||0}</div><div class="sl">Available Donations</div></div></div>
+      <div class="sc"><div class="si si-a">🚚</div><div><div class="sv">${s.pending_deliveries||0}</div><div class="sl">Pending Deliveries</div></div></div>
+      <div class="sc"><div class="si si-b">👨‍👩‍👧</div><div><div class="sv">${s.beneficiaries||0}</div><div class="sl">Beneficiaries</div></div></div>
+      <div class="sc"><div class="si si-p">✅</div><div><div class="sv">${s.completed_deliveries||0}</div><div class="sl">Completed</div></div></div>
+    `;loadLandStats();
+  }catch{}
+  loadDonTab();
+}
+
+let _dTab='don';
+function dTab(name,btn){
+  _dTab=name;
+  ['don','ev','ben'].forEach(t=>$('dt-'+t).style.display=t===name?'block':'none');
+  document.querySelectorAll('#p-dash .tab').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  if(name==='don')loadDonTab();
+  if(name==='ev')loadEvTab();
+  if(name==='ben')loadBenTab();
+}
+
+/* ── Donations Tab ── */
+async function loadDonTab(){
+  const canAdd=_usr.role==='restaurant'||_usr.role==='admin';
+  $('dt-don').innerHTML=`
+    <div class="card">
+      <div class="ch"><h3>Food Donations</h3>${canAdd?`<button class="btn btn-green btn-sm" onclick="openM('don')">+ Log Donation</button>`:''}</div>
+      <div class="cb tw"><table>
+        <thead><tr><th>Food Item</th><th>Category</th><th>Qty</th><th>Donor</th><th>Expiry</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody id="donTb"><tr><td colspan="7"><div class="empty"><div class="empty-e">⏳</div><p>Loading...</p></div></td></tr></tbody>
+      </table></div>
+    </div>`;
+  try{
+    const rows=await api('/donations');
+    const tb=$('donTb');
+    if(!rows.length){tb.innerHTML=`<tr><td colspan="7"><div class="empty"><div class="empty-e">🍱</div><p>No donations yet${canAdd?'. Add one above!':''}</p></div></td></tr>`;return;}
+    tb.innerHTML=rows.map(d=>`<tr>
+      <td><strong>${d.food_name}</strong></td>
+      <td><span class="badge bg-b">${d.category}</span></td>
+      <td>${d.quantity} ${d.unit}</td>
+      <td>${d.organization||d.donor_name||'—'}</td>
+      <td style="font-size:.8rem;color:var(--muted)">${fmtDate(d.expiry_date)}</td>
+      <td>${badge(d.status)}</td>
+      <td>
+        ${d.status==='available'?`<button class="btn btn-amb btn-xs" onclick="updDon('${d.id}','scheduled')">📅 Schedule</button>`:''}
+        ${d.status==='scheduled'?`<button class="btn btn-green btn-xs" onclick="updDon('${d.id}','collected')">✓ Collected</button>`:''}
+      </td>
+    </tr>`).join('');
+  }catch{}
+}
+async function updDon(id,status){const r=await api(`/donations/${id}/status`,'PATCH',{status});if(r.error)toast(r.error,'err');else{toast('Updated!');loadDonTab();}}
+async function subDon(){
+  clrA('da');
+  const data={food_name:$('df').value.trim(),category:$('dc').value,quantity:parseFloat($('dq').value),unit:$('du').value,expiry_date:$('de').value,pickup_address:$('dp').value.trim(),description:$('dd').value.trim()};
+  if(!data.food_name||!data.quantity)return setA('da','Food name and quantity required');
+  $('dBtn').innerHTML='<span class="spin"></span>';$('dBtn').disabled=true;
+  try{
+    const r=await api('/donations','POST',data);
+    if(r.error){setA('da',r.error);return;}
+    toast('✅ Donation logged!');closeM('don');loadDonTab();
+    ['df','dq','de','dp','dd'].forEach(i=>$(i).value='');
+  }catch{setA('da','Error submitting');}
+  finally{$('dBtn').innerHTML='Submit Donation →';$('dBtn').disabled=false;}
+}
+
+/* ── Events Tab ── */
+async function loadEvTab(){
+  $('dt-ev').innerHTML=`
+    <div class="card">
+      <div class="ch"><h3>Distribution Events</h3><button class="btn btn-green btn-sm" onclick="openAddEv()">+ Schedule Event</button></div>
+      <div class="cb tw"><table>
+        <thead><tr><th>Title</th><th>Date</th><th>Food</th><th>Volunteer</th><th>Beneficiary</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody id="evTb"><tr><td colspan="7"><div class="empty"><div class="empty-e">⏳</div><p>Loading...</p></div></td></tr></tbody>
+      </table></div>
+    </div>`;
+  try{
+    const rows=await api('/events');
+    const tb=$('evTb');
+    if(!rows.length){tb.innerHTML=`<tr><td colspan="7"><div class="empty"><div class="empty-e">📅</div><p>No events scheduled.</p></div></td></tr>`;return;}
+    tb.innerHTML=rows.map(e=>`<tr>
+      <td><strong>${e.title}</strong></td>
+      <td style="font-size:.82rem">${fmtDate(e.scheduled_date)}</td>
+      <td style="font-size:.82rem">${e.food_name||'—'}</td>
+      <td>${e.volunteer_name||'—'}</td>
+      <td>${e.beneficiary_name||'—'}</td>
+      <td>${badge(e.status)}</td>
+      <td style="display:flex;gap:4px;flex-wrap:wrap">
+        ${e.status==='pending'?`<button class="btn btn-amb btn-xs" onclick="updEv('${e.id}','in_progress')">▶ Start</button>`:''}
+        ${e.status==='in_progress'?`<button class="btn btn-green btn-xs" onclick="updEv('${e.id}','completed')">✓ Done</button>`:''}
+        ${['pending','in_progress'].includes(e.status)?`<button class="btn btn-red btn-xs" onclick="updEv('${e.id}','cancelled')">✕</button>`:''}
+      </td>
+    </tr>`).join('');
+  }catch{}
+}
+async function openAddEv(){
+  clrA('ea');
+  try{
+    const[dons,vols,bens]=await Promise.all([api('/donations'),api('/volunteers'),api('/beneficiaries')]);
+    const avail=(dons||[]).filter(d=>d.status==='available');
+    $('edon').innerHTML=`<option value="">— None —</option>`+avail.map(d=>`<option value="${d.id}">${d.food_name} (${d.quantity} ${d.unit})</option>`).join('');
+    $('evol').innerHTML=`<option value="">— None —</option>`+(vols||[]).map(v=>`<option value="${v.id}">${v.name}${v.city?' · '+v.city:''}</option>`).join('');
+    $('eben').innerHTML=`<option value="">— None —</option>`+(bens||[]).map(b=>`<option value="${b.id}">${b.name} (${b.family_size})</option>`).join('');
+  }catch{}
+  openM('ev');
+}
+async function updEv(id,status){const r=await api(`/events/${id}/status`,'PATCH',{status});if(r.error)toast(r.error,'err');else{toast('Updated!');loadEvTab();}}
+async function subEv(){
+  clrA('ea');
+  const data={title:$('et').value.trim(),scheduled_date:$('ed').value,scheduled_time:$('eti').value,donation_id:$('edon').value||null,volunteer_id:$('evol').value||null,beneficiary_id:$('eben').value||null,pickup_location:$('epu').value.trim(),delivery_location:$('edl').value.trim(),notes:$('en').value.trim()};
+  if(!data.title||!data.scheduled_date)return setA('ea','Title and date required');
+  $('eBtn').innerHTML='<span class="spin"></span>';$('eBtn').disabled=true;
+  try{
+    const r=await api('/events','POST',data);
+    if(r.error){setA('ea',r.error);return;}
+    toast('📅 Event scheduled!');closeM('ev');loadEvTab();
+    ['et','ed','eti','epu','edl','en'].forEach(i=>$(i).value='');
+  }catch{setA('ea','Error');}
+  finally{$('eBtn').innerHTML='Schedule Event →';$('eBtn').disabled=false;}
+}
+
+/* ── Beneficiaries Tab ── */
+async function loadBenTab(){
+  $('dt-ben').innerHTML=`
+    <div class="card">
+      <div class="ch"><h3>Beneficiaries</h3><button class="btn btn-green btn-sm" onclick="openM('ben')">+ Add</button></div>
+      <div class="cb tw"><table>
+        <thead><tr><th>Name</th><th>Contact</th><th>City</th><th>Address</th><th>Family</th><th>Needs</th><th>Action</th></tr></thead>
+        <tbody id="benTb"><tr><td colspan="7"><div class="empty"><div class="empty-e">⏳</div><p>Loading...</p></div></td></tr></tbody>
+      </table></div>
+    </div>`;
+  try{
+    const rows=await api('/beneficiaries');
+    const tb=$('benTb');
+    if(!rows.length){tb.innerHTML=`<tr><td colspan="7"><div class="empty"><div class="empty-e">👥</div><p>No beneficiaries registered.</p></div></td></tr>`;return;}
+    tb.innerHTML=rows.map(b=>`<tr>
+      <td><strong>${b.name}</strong></td>
+      <td style="font-size:.82rem">${b.contact||'—'}</td>
+      <td>${b.city||'—'}</td>
+      <td style="font-size:.82rem;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.address}</td>
+      <td><span class="badge bg-b">${b.family_size} 👥</span></td>
+      <td style="font-size:.8rem;color:var(--muted)">${b.needs||'—'}</td>
+      <td><button class="btn btn-red btn-xs" onclick="delBen('${b.id}')">Remove</button></td>
+    </tr>`).join('');
+  }catch{}
+}
+async function delBen(id){if(!confirm('Remove this beneficiary?'))return;await api(`/beneficiaries/${id}`,'DELETE');toast('Removed');loadBenTab();}
+async function subBen(){
+  clrA('ba');
+  const data={name:$('bn').value.trim(),contact:$('bc').value.trim(),address:$('bad').value.trim(),city:$('bci').value.trim(),family_size:parseInt($('bf').value)||1,needs:$('bne').value.trim()};
+  if(!data.name||!data.address)return setA('ba','Name and address required');
+  $('bBtn').innerHTML='<span class="spin"></span>';$('bBtn').disabled=true;
+  try{
+    const r=await api('/beneficiaries','POST',data);
+    if(r.error){setA('ba',r.error);return;}
+    toast('👨‍👩‍👧 Registered!');closeM('ben');loadBenTab();
+    ['bn','bc','bad','bci','bne'].forEach(i=>$(i).value='');$('bf').value='1';
+  }catch{setA('ba','Error');}
+  finally{$('bBtn').innerHTML='Register →';$('bBtn').disabled=false;}
+}
+
+/* ══ ADMIN PANEL ══ */
+async function loadAdmin(){
+  showPage('admin');
+  try{
+    const s=await api('/admin/stats');
+    $('aStats').innerHTML=`
+      <div class="sc"><div class="si si-b">👤</div><div><div class="sv">${s.total_users||0}</div><div class="sl">Total Users</div></div></div>
+      <div class="sc"><div class="si si-a">⏳</div><div><div class="sv">${s.pending_verification||0}</div><div class="sl">Pending Verify</div></div></div>
+      <div class="sc"><div class="si si-g">🍱</div><div><div class="sv">${s.total_donations||0}</div><div class="sl">Donations</div></div></div>
+      <div class="sc"><div class="si si-p">🧑‍🤝‍🧑</div><div><div class="sv">${s.total_recipients||0}</div><div class="sl">Recipients</div></div></div>
+      <div class="sc"><div class="si si-o">🙌</div><div><div class="sv">${s.total_volunteers||0}</div><div class="sl">Volunteers</div></div></div>
+      <div class="sc"><div class="si si-g">✅</div><div><div class="sv">${s.completed_events||0}</div><div class="sl">Events Done</div></div></div>
+    `;
+  }catch{}
+  loadAUsers();
+}
+
+function aTab(name,btn){
+  ['users','don','ev','ben','log'].forEach(t=>$('ap-'+t).style.display=t===name?'block':'none');
+  document.querySelectorAll('.admin-tabs .at').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  ({users:loadAUsers,don:loadADon,ev:loadAEv,ben:loadABen,log:loadALog})[name]?.();
+}
+
+async function loadAUsers(){
+  $('ap-users').innerHTML=`
+    <div class="card">
+      <div class="ch"><h3>All Users</h3><span style="font-size:.78rem;color:var(--muted)">Recipients are auto-verified · Others need manual approval</span></div>
+      <div class="cb tw"><table>
+        <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Organisation</th><th>City</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody id="auTb"></tbody>
+      </table></div>
+    </div>`;
+  try{
+    const rows=await api('/admin/users');
+    $('auTb').innerHTML=rows.map(u=>`<tr>
+      <td><strong>${u.name}</strong></td>
+      <td style="font-size:.82rem">${u.email}</td>
+      <td>${roleBadge(u.role)}</td>
+      <td style="font-size:.82rem">${u.organization||'—'}</td>
+      <td style="font-size:.82rem">${u.city||'—'}</td>
+      <td>
+        ${u.verified?badge('available'):`<span class="badge bg-a">pending</span>`}
+        ${!u.active?`<span class="badge bg-r" style="margin-left:4px">inactive</span>`:''}
+      </td>
+      <td style="display:flex;gap:5px;flex-wrap:wrap">
+        ${!u.verified&&u.role!=='admin'?`<button class="btn btn-green btn-xs" onclick="verifyUser('${u.id}')">✓ Verify</button>`:''}
+        ${u.role!=='admin'?`<button class="btn btn-xs ${u.active?'btn-red':'btn-outline'}" onclick="toggleUser('${u.id}')">${u.active?'Deactivate':'Activate'}</button>`:''}
+      </td>
+    </tr>`).join('');
+  }catch{}
+}
+async function verifyUser(id){const r=await api(`/admin/users/${id}/verify`,'PATCH');if(r.error)toast(r.error,'err');else{toast('✅ User verified!');loadAdmin();loadAUsers();}}
+async function toggleUser(id){const r=await api(`/admin/users/${id}/toggle`,'PATCH');if(r.error)toast(r.error,'err');else{toast(r.message);loadAUsers();}}
+
+async function loadADon(){
+  $('ap-don').innerHTML=`<div class="card"><div class="ch"><h3>All Donations</h3></div><div class="cb tw"><table><thead><tr><th>Food</th><th>Category</th><th>Qty</th><th>Donor</th><th>Status</th><th>Date</th></tr></thead><tbody id="adTb"></tbody></table></div></div>`;
+  try{const rows=await api('/donations');$('adTb').innerHTML=rows.map(d=>`<tr><td><strong>${d.food_name}</strong></td><td><span class="badge bg-b">${d.category}</span></td><td>${d.quantity} ${d.unit}</td><td>${d.organization||d.donor_name||'—'}</td><td>${badge(d.status)}</td><td style="font-size:.78rem;color:var(--muted)">${fmtDate(d.created_at)}</td></tr>`).join('')||`<tr><td colspan="6"><div class="empty"><div class="empty-e">🍱</div><p>No donations</p></div></td></tr>`;}catch{}
+}
+async function loadAEv(){
+  $('ap-ev').innerHTML=`<div class="card"><div class="ch"><h3>All Events</h3></div><div class="cb tw"><table><thead><tr><th>Title</th><th>Date</th><th>Food</th><th>Organizer</th><th>Status</th></tr></thead><tbody id="aeTb"></tbody></table></div></div>`;
+  try{const rows=await api('/events');$('aeTb').innerHTML=rows.map(e=>`<tr><td><strong>${e.title}</strong></td><td style="font-size:.82rem">${fmtDate(e.scheduled_date)}</td><td style="font-size:.82rem">${e.food_name||'—'}</td><td style="font-size:.82rem">${e.organizer_name||e.organizer_org||'—'}</td><td>${badge(e.status)}</td></tr>`).join('')||`<tr><td colspan="5"><div class="empty"><div class="empty-e">📅</div><p>No events</p></div></td></tr>`;}catch{}
+}
+async function loadABen(){
+  $('ap-ben').innerHTML=`<div class="card"><div class="ch"><h3>All Beneficiaries</h3></div><div class="cb tw"><table><thead><tr><th>Name</th><th>Contact</th><th>City</th><th>Family</th><th>Needs</th><th>Registered By</th></tr></thead><tbody id="abTb"></tbody></table></div></div>`;
+  try{const rows=await api('/beneficiaries');$('abTb').innerHTML=rows.map(b=>`<tr><td><strong>${b.name}</strong></td><td style="font-size:.82rem">${b.contact||'—'}</td><td>${b.city||'—'}</td><td><span class="badge bg-b">${b.family_size} 👥</span></td><td style="font-size:.8rem;color:var(--muted)">${b.needs||'—'}</td><td style="font-size:.78rem;color:var(--muted)">${b.registered_by_name||'—'}</td></tr>`).join('')||`<tr><td colspan="6"><div class="empty"><div class="empty-e">👥</div><p>None yet</p></div></td></tr>`;}catch{}
+}
+async function loadALog(){
+  $('ap-log').innerHTML=`<div class="card"><div class="ch"><h3>Activity Log <span style="font-size:.78rem;color:var(--muted);font-weight:400">(last 100)</span></h3></div><div class="cb tw"><table><thead><tr><th>User</th><th>Role</th><th>Action</th><th>Details</th><th>Time</th></tr></thead><tbody id="alTb"></tbody></table></div></div>`;
+  try{const rows=await api('/admin/activity');$('alTb').innerHTML=rows.map(a=>`<tr><td><strong>${a.user_name||'System'}</strong></td><td>${a.user_role?roleBadge(a.user_role):'—'}</td><td><code style="background:var(--surface);padding:2px 7px;border-radius:5px;font-size:.72rem;color:var(--g1)">${a.action}</code></td><td style="font-size:.8rem;color:var(--muted)">${a.details||'—'}</td><td style="font-size:.76rem;color:var(--muted);white-space:nowrap">${fmtDate(a.created_at)}</td></tr>`).join('')||`<tr><td colspan="5"><div class="empty"><div class="empty-e">📋</div><p>No activity</p></div></td></tr>`;}catch{}
+}
+
+/* ══ INIT ══ */
+renderNav();
+loadLandStats();
+if(_tok&&_usr){
+  if(_usr.role==='admin') loadAdmin();
+  else if(_usr.role==='recipient') loadRecipient();
+  else loadDash();
+}
+</script>
+</body>
+</html>
