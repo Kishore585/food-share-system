@@ -18,9 +18,12 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '../frontend/public')));
 
 /* ── Promisified DB helpers ── */
-const dbRun = (sql, p=[]) => db.execute(sql, p).then(([r]) => r);
-const dbGet = (sql, p=[]) => db.execute(sql, p).then(([r]) => r[0]);
-const dbAll = (sql, p=[]) => db.execute(sql, p).then(([r]) => r);
+const dbRun = (sql, p=[]) => new Promise((res,rej) =>
+  db.run(sql, p, function(e){ e ? rej(e) : res(this); }));
+const dbGet = (sql, p=[]) => new Promise((res,rej) =>
+  db.get(sql, p, (e,r) => e ? rej(e) : res(r)));
+const dbAll = (sql, p=[]) => new Promise((res,rej) =>
+  db.all(sql, p, (e,r) => e ? rej(e) : res(r||[])));
 const log   = (uid, action, details=null) =>
   dbRun(`INSERT INTO activity_log(id,user_id,action,details) VALUES(?,?,?,?)`,
         [uuidv4(), uid, action, details]).catch(()=>{});
