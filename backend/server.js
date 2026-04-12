@@ -6,7 +6,7 @@ const jwt     = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 const path    = require('path');
 
-const db = require('./database');
+const { db, initDB } = require('./database');
 const { auth, adminOnly, notRecipient, JWT_SECRET } = require('./middleware');
 
 const app  = express();
@@ -17,14 +17,20 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '../frontend/public')));
 
-/* ── Promisified DB helpers ── */
-const dbRun = (sql, p=[]) => new Promise((res,rej) =>
-  db.run(sql, p, function(e){ e ? rej(e) : res(this); }));
-const dbGet = (sql, p=[]) => new Promise((res,rej) =>
-  db.get(sql, p, (e,r) => e ? rej(e) : res(r)));
-const dbAll = (sql, p=[]) => new Promise((res,rej) =>
-  db.all(sql, p, (e,r) => e ? rej(e) : res(r||[])));
-const log   = (uid, action, details=null) =>
+/* ── Promisified DB helpers (MySQL via mysql2/promise) ── */
+const dbRun = async (sql, p=[]) => {
+  const [result] = await db.execute(sql, p);
+  return result;
+};
+const dbGet = async (sql, p=[]) => {
+  const [rows] = await db.execute(sql, p);
+  return rows[0] || null;
+};
+const dbAll = async (sql, p=[]) => {
+  const [rows] = await db.execute(sql, p);
+  return rows || [];
+};
+const log = (uid, action, details=null) =>
   dbRun(`INSERT INTO activity_log(id,user_id,action,details) VALUES(?,?,?,?)`,
         [uuidv4(), uid, action, details]).catch(()=>{});
 
@@ -63,7 +69,7 @@ app.post('/api/auth/register', async (req,res) => {
       : 'Registration successful! Your account is pending admin verification.';
     res.json({ success: true, message: msg });
   } catch(e) {
-    if (e.message?.includes('UNIQUE'))
+    if (e.message?.includes('Duplicate'))
       return res.status(400).json({ error: 'This email is already registered' });
     res.status(500).json({ error: 'Registration failed. Please try again.' });
   }
@@ -112,10 +118,10 @@ app.get('/api/auth/me', auth, async (req,res) => {
 app.get('/api/stats', async (req,res) => {
   try {
     const [a,b,c,d] = await Promise.all([
-      dbGet(`SELECT COUNT(*) c FROM food_donations WHERE status='available'`),
-      dbGet(`SELECT COUNT(*) c FROM distribution_events WHERE status='pending'`),
-      dbGet(`SELECT COUNT(*) c FROM beneficiaries WHERE active=1`),
-      dbGet(`SELECT COUNT(*) c FROM distribution_events WHERE status='completed'`)
+      dbGet(`SELECT COUNT(*) AS c FROM food_donations WHERE status='available'`),
+      dbGet(`SELECT COUNT(*) AS c FROM distribution_events WHERE status='pending'`),
+      dbGet(`SELECT COUNT(*) AS c FROM beneficiaries WHERE active=1`),
+      dbGet(`SELECT COUNT(*) AS c FROM distribution_events WHERE status='completed'`)
     ]);
     res.json({ available_donations:a?.c||0, pending_deliveries:b?.c||0,
                beneficiaries:c?.c||0, completed_deliveries:d?.c||0 });
@@ -328,14 +334,14 @@ app.get('/api/volunteers', auth, notRecipient, async (req,res) => {
 app.get('/api/admin/stats', auth, adminOnly, async (req,res) => {
   try {
     const [users,pending,donations,bene,done,pendEv,vols,recip] = await Promise.all([
-      dbGet(`SELECT COUNT(*) c FROM users WHERE role!='admin'`),
-      dbGet(`SELECT COUNT(*) c FROM users WHERE verified=0 AND role!='admin' AND active=1`),
-      dbGet(`SELECT COUNT(*) c FROM food_donations`),
-      dbGet(`SELECT COUNT(*) c FROM beneficiaries WHERE active=1`),
-      dbGet(`SELECT COUNT(*) c FROM distribution_events WHERE status='completed'`),
-      dbGet(`SELECT COUNT(*) c FROM distribution_events WHERE status='pending'`),
-      dbGet(`SELECT COUNT(*) c FROM users WHERE role='volunteer' AND active=1`),
-      dbGet(`SELECT COUNT(*) c FROM users WHERE role='recipient' AND active=1`)
+      dbGet(`SELECT COUNT(*) AS c FROM users WHERE role!='admin'`),
+      dbGet(`SELECT COUNT(*) AS c FROM users WHERE verified=0 AND role!='admin' AND active=1`),
+      dbGet(`SELECT COUNT(*) AS c FROM food_donations`),
+      dbGet(`SELECT COUNT(*) AS c FROM beneficiaries WHERE active=1`),
+      dbGet(`SELECT COUNT(*) AS c FROM distribution_events WHERE status='completed'`),
+      dbGet(`SELECT COUNT(*) AS c FROM distribution_events WHERE status='pending'`),
+      dbGet(`SELECT COUNT(*) AS c FROM users WHERE role='volunteer' AND active=1`),
+      dbGet(`SELECT COUNT(*) AS c FROM users WHERE role='recipient' AND active=1`)
     ]);
     res.json({
       total_users:         users?.c||0,
@@ -372,7 +378,7 @@ app.patch('/api/admin/users/:id/verify', auth, adminOnly, async (req,res) => {
 app.patch('/api/admin/users/:id/toggle', auth, adminOnly, async (req,res) => {
   try {
     await dbRun(
-      `UPDATE users SET active=CASE WHEN active=1 THEN 0 ELSE 1 END WHERE id=? AND role!='admin'`,
+      `UPDATE users SET active = CASE WHEN active=1 THEN 0 ELSE 1 END WHERE id=? AND role!='admin'`,
       [req.params.id]);
     const u = await dbGet(`SELECT name,active FROM users WHERE id=?`, [req.params.id]);
     await log(req.user.id, 'USER_TOGGLED', `${u?.name} → ${u?.active?'active':'inactive'}`);
@@ -395,12 +401,18 @@ app.get('/api/admin/activity', auth, adminOnly, async (req,res) => {
 app.get('*', (req,res) =>
   res.sendFile(path.join(__dirname,'../frontend/public/index.html')));
 
-app.listen(PORT, () => {
-  console.log('\n╔═══════════════════════════════════════╗');
-  console.log(`║  🌿 FoodShare  →  http://localhost:${PORT} ║`);
-  console.log('╠═══════════════════════════════════════╣');
-  console.log('║  admin@foodshare.org  /  Admin@123    ║');
-  console.log('║  demo@restaurant.com  /  Demo@123     ║');
-  console.log('║  recipient@demo.com   /  Demo@123     ║');
-  console.log('╚═══════════════════════════════════════╝\n');
+/* ── Start server only after DB is initialised ── */
+initDB().then(() => {
+  app.listen(PORT, () => {
+    console.log('\n╔═══════════════════════════════════════╗');
+    console.log(`║  🌿 FoodShare  →  http://localhost:${PORT} ║`);
+    console.log('╠═══════════════════════════════════════╣');
+    console.log('║  admin@foodshare.org  /  Admin@123    ║');
+    console.log('║  demo@restaurant.com  /  Demo@123     ║');
+    console.log('║  recipient@demo.com   /  Demo@123     ║');
+    console.log('╚═══════════════════════════════════════╝\n');
+  });
+}).catch(err => {
+  console.error('❌ Failed to start server:', err.message);
+  process.exit(1);
 });
